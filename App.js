@@ -1,79 +1,100 @@
-import { StyleSheet, Text, View } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
+import { GlobalStyles } from "./constants/styles";
 
 import RecentExpensesScreen from "./screens/RecentExpensesScreen";
 import AllExpensesScreen from "./screens/AllExpensesScreen";
+import MangeExpenseScreen from "./screens/MangeExpenseScreen";
+import IconButton from "./components/UI/IconButton";
+import { ExpensesContextProvider } from "./context/expensesContext";
 
 export default function App() {
   const Tabs = createBottomTabNavigator();
-  return (
-    <>
-      <StatusBar style="light" />
-      <NavigationContainer>
-        <Tabs.Navigator
-          screenOptions={{
-            headerStyle: {
-              backgroundColor: "#5412d8",
-            },
-            headerTintColor: "#fff",
-            tabBarStyle: {
-              backgroundColor: "#5412d8",
-            },
-            tabBarActiveTintColor: "yellow",
-            headerRight: () => (
-              <MaterialCommunityIcons
-                name="plus"
-                size={24}
-                color="white"
-                style={{ marginRight: 10 }}
-              />
+  const Stack = createNativeStackNavigator();
+
+  const ViewExpensesNavigator = () => {
+    return (
+      <Tabs.Navigator
+        screenOptions={({ navigation }) => ({
+          headerStyle: {
+            backgroundColor: GlobalStyles.colors.primary500,
+          },
+          headerTintColor: "white",
+          tabBarStyle: {
+            backgroundColor: GlobalStyles.colors.primary500,
+          },
+          tabBarActiveTintColor: GlobalStyles.colors.accent500,
+          headerRight: ({ tintColor }) => (
+            <IconButton
+              icon="add"
+              size={24}
+              color={tintColor}
+              onPress={() => {
+                navigation.navigate("MangeExpense");
+              }}
+            />
+          ),
+        })}
+        sceneContainerStyle={{
+          backgroundColor: "white",
+        }}
+      >
+        <Tabs.Screen
+          name="Recent Expenses"
+          component={RecentExpensesScreen}
+          options={{
+            tabBarLabel: "Recent",
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="hourglass" color={color} size={size} />
             ),
           }}
-          sceneContainerStyle={{
-            backgroundColor: "#39079d",
+        />
+        <Tabs.Screen
+          name="All Expenses"
+          component={AllExpensesScreen}
+          options={{
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="calendar" color={color} size={size} />
+            ),
           }}
-        >
-          <Tabs.Screen
-            name="Recent Expenses"
-            component={RecentExpensesScreen}
-            options={{
-              tabBarLabel: "Recent",
-              tabBarIcon: ({ color, size }) => (
-                <MaterialCommunityIcons
-                  name="timer-sand"
-                  color={color}
-                  size={size}
-                />
-              ),
+        />
+      </Tabs.Navigator>
+    );
+  };
+
+  return (
+    <>
+      <ExpensesContextProvider>
+        <StatusBar style="light" />
+        <NavigationContainer>
+          <Stack.Navigator
+            screenOptions={{
+              headerStyle: {
+                backgroundColor: GlobalStyles.colors.primary500,
+              },
+              headerTintColor: "white",
             }}
-          />
-          <Tabs.Screen
-            name="All Expenses"
-            component={AllExpensesScreen}
-            options={{
-              tabBarIcon: ({ color, size }) => (
-                <MaterialCommunityIcons
-                  name="calendar-month"
-                  color={color}
-                  size={size}
-                />
-              ),
-            }}
-          />
-        </Tabs.Navigator>
-      </NavigationContainer>
+          >
+            <Stack.Screen
+              name="ViewExpensesNavigator"
+              component={ViewExpensesNavigator}
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="MangeExpense"
+              component={MangeExpenseScreen}
+              options={{
+                presentation: "modal",
+              }}
+            />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </ExpensesContextProvider>
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
